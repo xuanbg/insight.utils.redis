@@ -43,18 +43,9 @@ public final class Generator {
     }
 
     /**
-     * 生成uuid
+     * 获取指定格式的加密编码
      *
-     * @return uuid
-     */
-    public static String uuid() {
-        return UUID.randomUUID().toString().replace("-", "");
-    }
-
-    /**
-     * 获取指定格式的编码
-     *
-     * @param format 编码格式,日期格式为yyyy-MM-dd的组合,流水号格式为#l,l为流水号位数,前补0
+     * @param format 编码格式,日期格式为yyyy-MM-dd的组合,流水号格式为#l,l为加密流水号位数
      * @param group  分组格式
      * @return 编码
      */
