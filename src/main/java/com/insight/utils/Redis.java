@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  * @remark Redis工具类
  */
 public final class Redis {
-    private static StringRedisTemplate REDIS = ContextHolder.getContext().getBean(StringRedisTemplate.class);
+    private static final StringRedisTemplate REDIS = ContextHolder.getContext().getBean(StringRedisTemplate.class);
 
     /**
      * Redis中是否存在指定键
@@ -127,6 +127,16 @@ public final class Redis {
         Object val = REDIS.opsForHash().get(key, field);
 
         return val == null ? null : val.toString();
+    }
+
+    /**
+     * 从Redis读取指定键下的字段名称的值
+     *
+     * @param key   键
+     * @return Value
+     */
+    public static Map<Object, Object> getEntity(String key) {
+        return REDIS.opsForHash().entries(key);
     }
 
     /**
