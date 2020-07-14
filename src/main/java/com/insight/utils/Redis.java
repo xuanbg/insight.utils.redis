@@ -37,6 +37,18 @@ public final class Redis {
     }
 
     /**
+     * 获取Key过期时间
+     *
+     * @param key  键
+     * @return 过期时间
+     */
+    public static long getExpire(String key) {
+        Long expire = REDIS.getExpire(key);
+
+        return expire == null ? 0 : expire;
+    }
+
+    /**
      * 设置Key过期时间
      *
      * @param key  键
