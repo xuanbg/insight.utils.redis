@@ -55,7 +55,7 @@
 
   <repositories>
     <repository>
-      <id>dev</id>
+      <id>release</id>
       <url>https://nexus.i-facture.com/repository/maven-public/</url>
       <releases>
         <enabled>true</enabled>
