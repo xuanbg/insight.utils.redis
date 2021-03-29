@@ -39,7 +39,7 @@ public final class Redis {
     /**
      * 获取Key过期时间
      *
-     * @param key  键
+     * @param key 键
      * @return 过期时间
      */
     public static long getExpire(String key) {
@@ -101,7 +101,11 @@ public final class Redis {
      * @param unit  时间单位
      */
     public static void set(String key, String value, long time, TimeUnit unit) {
-        REDIS.opsForValue().set(key, value, time, unit);
+        if (time < 0) {
+            REDIS.opsForValue().set(key, value);
+        } else {
+            REDIS.opsForValue().set(key, value, time, unit);
+        }
     }
 
     /**
@@ -114,7 +118,7 @@ public final class Redis {
     public static boolean setIfAbsent(String key, String value) {
         Boolean absent = REDIS.opsForValue().setIfAbsent(key, value);
 
-        return absent == null ? false : absent;
+        return absent != null && absent;
     }
 
     /**
@@ -144,7 +148,7 @@ public final class Redis {
     /**
      * 从Redis读取指定键下的字段名称的值
      *
-     * @param key   键
+     * @param key 键
      * @return Value
      */
     public static Map<Object, Object> getEntity(String key) {

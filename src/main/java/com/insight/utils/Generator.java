@@ -15,10 +15,10 @@ import java.util.*;
  * @remark 常用Generator
  */
 public final class Generator {
-    private static Logger logger = LoggerFactory.getLogger(Generator.class);
-    private static LockHandler LOCK = ContextHolder.getContext().getBean(LockHandler.class);
-    private static ObjectMapper mapper = new ObjectMapper();
-    private static Map<String, Object> set;
+    private static final Logger logger = LoggerFactory.getLogger(Generator.class);
+    private static final LockHandler LOCK = ContextHolder.getContext().getBean(LockHandler.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Map<String, Object> SET;
 
     static {
         String val = Redis.get("Config:GarbleSet");
@@ -29,16 +29,16 @@ public final class Generator {
             }
 
             Random random = new Random();
-            set = new HashMap<>();
+            SET = new HashMap<>();
             for (int i = 0; i < 100; i++) {
                 int index = random.nextInt(100 - i);
-                set.put(flushLeft(i, 2), list.get(index));
+                SET.put(flushLeft(i, 2), list.get(index));
                 list.remove(index);
             }
 
-            Redis.set("Config:GarbleSet", toJson(set));
+            Redis.set("Config:GarbleSet", toJson());
         } else {
-            set = toMap(val);
+            SET = toMap(val);
         }
     }
 
@@ -143,7 +143,7 @@ public final class Generator {
         int len = str.length();
         String first = len > 2 ? str.substring(0, 1) : "";
         String high = len > 3 ? str.substring(1, len - 2) : "";
-        String low = String.valueOf(set.get(str.substring(len - 2, len)));
+        String low = String.valueOf(SET.get(str.substring(len - 2, len)));
 
         return high + low + first;
     }
@@ -190,16 +190,11 @@ public final class Generator {
     /**
      * 将bean转换成json
      *
-     * @param obj bean对象
      * @return json
      */
-    private static String toJson(Object obj) {
-        if (obj == null) {
-            return null;
-        }
-
+    private static String toJson() {
         try {
-            return mapper.writeValueAsString(obj);
+            return MAPPER.writeValueAsString(Generator.SET);
         } catch (IOException ex) {
             logger.error("序列化对象失败! {}", ex.getMessage());
             return null;
@@ -219,7 +214,7 @@ public final class Generator {
         }
 
         try {
-            return mapper.readValue(json, HashMap.class);
+            return MAPPER.readValue(json, HashMap.class);
         } catch (IOException ex) {
             logger.error("反序列化为Map失败! {}", ex.getMessage());
             return null;
