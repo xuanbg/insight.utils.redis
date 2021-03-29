@@ -89,7 +89,27 @@ public final class Redis {
      * @param value 值
      */
     public static void set(String key, String value) {
-        REDIS.opsForValue().set(key, value);
+        Long expire = REDIS.getExpire(key);
+        if (expire == null || expire < 0) {
+            REDIS.opsForValue().set(key, value);
+        }else {
+            REDIS.opsForValue().set(key, value, expire);
+        }
+    }
+
+    /**
+     * 以键值对方式保存数据到Redis
+     *
+     * @param key   键
+     * @param value 值
+     * @param time  时间长度
+     */
+    public static void set(String key, String value, long time) {
+        if (time < 0) {
+            REDIS.opsForValue().set(key, value);
+        } else {
+            REDIS.opsForValue().set(key, value, time);
+        }
     }
 
     /**

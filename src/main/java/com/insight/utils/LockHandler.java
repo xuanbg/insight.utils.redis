@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * @author duxl
  * @date 2017/11/17
@@ -32,9 +30,9 @@ public class LockHandler {
      * 操作redis获取全局锁
      *
      * @param param           锁的名称
-     * @param timeout         获取的超时时间
+     * @param timeout         超时时间(秒)
      * @param tryInterval     多少ms尝试一次
-     * @param paramExpireTime 获取成功后锁的过期时间
+     * @param paramExpireTime 过期时间(秒)
      * @return true 获取成功，false获取失败
      */
     public boolean getLock(LockParam param, long timeout, long tryInterval, long paramExpireTime) {
@@ -48,11 +46,11 @@ public class LockHandler {
             long startTime = System.currentTimeMillis();
             while (true) {
                 if (Redis.setIfAbsent(key, param.getValue())) {
-                    Redis.set(key, param.getValue(), paramExpireTime, TimeUnit.MILLISECONDS);
+                    Redis.set(key, param.getValue(), paramExpireTime);
                     return true;
                 }
 
-                if (System.currentTimeMillis() - startTime > timeout) {
+                if (System.currentTimeMillis() - startTime > timeout * 1000) {
                     return false;
                 }
 
