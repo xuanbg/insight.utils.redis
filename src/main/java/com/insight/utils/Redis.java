@@ -43,9 +43,7 @@ public final class Redis {
      * @return 过期时间
      */
     public static long getExpire(String key) {
-        Long expire = REDIS.getExpire(key);
-
-        return expire == null ? 0 : expire;
+        return getExpire(key, TimeUnit.SECONDS);
     }
 
     /**
@@ -61,6 +59,16 @@ public final class Redis {
         }
 
         REDIS.expire(key, time, unit);
+    }
+
+    /**
+     * 设置Key过期时间
+     *
+     * @param key  键
+     * @param time 时间长度
+     */
+    public static void setExpire(String key, long time) {
+        setExpire(key, time, TimeUnit.SECONDS);
     }
 
     /**
@@ -89,11 +97,10 @@ public final class Redis {
      * @param value 值
      */
     public static void set(String key, String value) {
-        Long expire = REDIS.getExpire(key);
-        if (expire == null || expire < 0) {
-            REDIS.opsForValue().set(key, value);
-        }else {
-            REDIS.opsForValue().set(key, value, expire);
+        long expire = getExpire(key);
+        REDIS.opsForValue().set(key, value);
+        if (expire > 0) {
+            setExpire(key, expire);
         }
     }
 
