@@ -105,11 +105,7 @@ public final class Redis {
      * @param time  时间长度
      */
     public static void set(String key, String value, long time) {
-        if (time < 0) {
-            REDIS.opsForValue().set(key, value);
-        } else {
-            REDIS.opsForValue().set(key, value, time);
-        }
+        set(key, value, time, TimeUnit.SECONDS);
     }
 
     /**
@@ -194,7 +190,7 @@ public final class Redis {
      * @param field 字段名称
      * @param value 值
      */
-    public static void set(String key, String field, Object value) {
+    public static void setHash(String key, String field, Object value) {
         REDIS.opsForHash().put(key, field, value.toString());
     }
 
@@ -204,7 +200,7 @@ public final class Redis {
      * @param key 键
      * @param map Map 对象
      */
-    public static void set(String key, Map<String, String> map) {
+    public static void setHash(String key, Map<String, String> map) {
         REDIS.opsForHash().putAll(key, map);
     }
 
