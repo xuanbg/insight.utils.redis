@@ -16,7 +16,7 @@ public final class Redis {
     /**
      * 获取Key过期时间
      *
-     * @param key  键
+     * @param key 键
      * @return 过期时间
      */
     private static long getExpire(String key) {
@@ -30,6 +30,7 @@ public final class Redis {
      *
      * @param key  键
      * @param time 时间长度
+     * @param unit 时间单位
      */
     private static void setExpire(String key, long time, TimeUnit unit) {
         REDIS.expire(key, time, unit);
@@ -43,6 +44,21 @@ public final class Redis {
      */
     public static Boolean hasKey(String key) {
         return REDIS.hasKey(key);
+    }
+
+    /**
+     * 修改过期时间
+     *
+     * @param key  键
+     * @param time 要改变的秒数
+     */
+    public static void changeExpire(String key, long time) {
+        Long expire = REDIS.getExpire(key);
+        if (expire == null || expire + time <= 0) {
+            return;
+        }
+
+        setExpire(key, expire + time, TimeUnit.SECONDS);
     }
 
     /**
@@ -83,9 +99,9 @@ public final class Redis {
      *
      * @param key   键
      * @param value 值
-     * @param time  时间长度
+     * @param time  过期时间(秒),为空、0或负数不设置过期时间
      */
-    public static void set(String key, String value, long time) {
+    public static void set(String key, String value, Long time) {
         set(key, value, time, TimeUnit.SECONDS);
     }
 
@@ -94,12 +110,12 @@ public final class Redis {
      *
      * @param key   键
      * @param value 值
-     * @param time  时间长度
+     * @param time  时间长度,为空、0或负数不设置过期时间
      * @param unit  时间单位
      */
-    public static void set(String key, String value, long time, TimeUnit unit) {
+    public static void set(String key, String value, Long time, TimeUnit unit) {
         REDIS.opsForValue().set(key, value);
-        if (time > 0) {
+        if (time != null && time > 0) {
             setExpire(key, time, unit);
         }
     }
@@ -177,11 +193,15 @@ public final class Redis {
     /**
      * 以Hash方式保存数据到Redis
      *
-     * @param key 键
-     * @param map Map 对象
+     * @param key  键
+     * @param map  Map 对象
+     * @param time 过期时间(秒),为空、0或负数不设置过期时间
      */
-    public static void setHash(String key, Map<String, String> map) {
+    public static void setHash(String key, Map<String, String> map, Long time) {
         REDIS.opsForHash().putAll(key, map);
+        if (time != null && time > 0) {
+            setExpire(key, time, TimeUnit.SECONDS);
+        }
     }
 
     /**
@@ -223,9 +243,13 @@ public final class Redis {
      *
      * @param key   键
      * @param value 值
+     * @param time  过期时间(秒),为空、0或负数不设置过期时间
      */
-    public static void add(String key, String value) {
+    public static void add(String key, String value, Long time) {
         REDIS.opsForSet().add(key, value);
+        if (time != null && time > 0) {
+            setExpire(key, time, TimeUnit.SECONDS);
+        }
     }
 
     /**
