@@ -14,6 +14,28 @@ public final class Redis {
     private static final StringRedisTemplate REDIS = ContextHolder.getContext().getBean(StringRedisTemplate.class);
 
     /**
+     * 获取Key过期时间
+     *
+     * @param key  键
+     * @return 过期时间
+     */
+    private static long getExpire(String key) {
+        Long expire = REDIS.getExpire(key);
+
+        return expire == null ? 0 : expire;
+    }
+
+    /**
+     * 设置Key过期时间
+     *
+     * @param key  键
+     * @param time 时间长度
+     */
+    private static void setExpire(String key, long time, TimeUnit unit) {
+        REDIS.expire(key, time, unit);
+    }
+
+    /**
      * Redis中是否存在指定键
      *
      * @param key 键
@@ -21,54 +43,6 @@ public final class Redis {
      */
     public static Boolean hasKey(String key) {
         return REDIS.hasKey(key);
-    }
-
-    /**
-     * 获取Key过期时间
-     *
-     * @param key  键
-     * @param unit 时间单位
-     * @return 过期时间
-     */
-    public static long getExpire(String key, TimeUnit unit) {
-        Long expire = REDIS.getExpire(key, unit);
-
-        return expire == null ? 0 : expire;
-    }
-
-    /**
-     * 获取Key过期时间
-     *
-     * @param key 键
-     * @return 过期时间
-     */
-    public static long getExpire(String key) {
-        return getExpire(key, TimeUnit.SECONDS);
-    }
-
-    /**
-     * 设置Key过期时间
-     *
-     * @param key  键
-     * @param time 时间长度
-     * @param unit 时间单位
-     */
-    public static void setExpire(String key, long time, TimeUnit unit) {
-        if (!hasKey(key)) {
-            return;
-        }
-
-        REDIS.expire(key, time, unit);
-    }
-
-    /**
-     * 设置Key过期时间
-     *
-     * @param key  键
-     * @param time 时间长度
-     */
-    public static void setExpire(String key, long time) {
-        setExpire(key, time, TimeUnit.SECONDS);
     }
 
     /**
@@ -100,7 +74,7 @@ public final class Redis {
         long expire = getExpire(key);
         REDIS.opsForValue().set(key, value);
         if (expire > 0) {
-            setExpire(key, expire);
+            setExpire(key, expire, TimeUnit.SECONDS);
         }
     }
 
@@ -124,10 +98,9 @@ public final class Redis {
      * @param unit  时间单位
      */
     public static void set(String key, String value, long time, TimeUnit unit) {
-        if (time < 0) {
-            REDIS.opsForValue().set(key, value);
-        } else {
-            REDIS.opsForValue().set(key, value, time, unit);
+        REDIS.opsForValue().set(key, value);
+        if (time > 0) {
+            setExpire(key, time, unit);
         }
     }
 
